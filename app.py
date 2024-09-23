@@ -35,7 +35,7 @@ class main(Tkinter.Tk):
 
 		# Custom Mode
 		self.custom_digital_clock = Label(self, text=self.format_top_time(self.main_time_object),  font=("Arial", 25), fg="blue", bd=2, relief=SUNKEN)
-		self.custom_box_1 =Label(self, text="Enter the amount of caffeine you'll be ingesting right now.\nmg:", bd=1, relief=SUNKEN)
+		self.custom_box_1 =Label(self, text="Enter the amount of coffee you'll be ingesting right now. (Assumes 8mg caffeine per g of coffee)\ng:", bd=1, relief=SUNKEN)
 		self.caffeine_entry = Entry(self, width=40)
 		self.custom_box_2 = Label(self, text="Select when you'll be going to bed.")
 		self.dd_button_clicked = StringVar()
@@ -171,14 +171,18 @@ class main(Tkinter.Tk):
 		if self.caffeine_entry.get().isdigit() == False:
 			messagebox.showerror("Error", "Enter numbers only")
 		else:
-			if self.caffeine_entry.get() != self.previous_caffeine_amount or dropdown_dict[self.dd_button_clicked.get()] != self.previous_dd_entry:
+			caffeine_amount = int(self.caffeine_entry.get()) * 8;
+			if caffeine_amount != self.previous_caffeine_amount or dropdown_dict[self.dd_button_clicked.get()] != self.previous_dd_entry:
 				self.custom_discription.grid_forget()
-				self.previous_caffeine_amount = self.caffeine_entry.get() 
+				self.previous_caffeine_amount = caffeine_amount;
 				self.previous_dd_entry = dropdown_dict[self.dd_button_clicked.get()]
 
 				timedelta_var = self.time_delta()
-				self.custom_discription = Label(self, text=f"You would have {round(self.coffee_half_life(caffeine_amount=int(self.caffeine_entry.get()), bedtime=timedelta_var), 1)}mg of caffeine in your blood if you went to bed at {str(dropdown_dict[self.dd_button_clicked.get()][0]) + str(dropdown_dict[self.dd_button_clicked.get()][1])}.\nIt is as if you had drank {round(int(self.coffee_half_life(caffeine_amount=int(self.caffeine_entry.get()),bedtime=timedelta_var) / 90 * 100))}% of a cup of coffee before you went to bed.", bd=1, relief=SUNKEN, pady=10)
-				self.custom_discription.grid(row=7, column=0)
+				bedtime_caffeine_amount = round(self.coffee_half_life(caffeine_amount=caffeine_amount, bedtime=timedelta_var), 1)
+				should_have_coffee = bedtime_caffeine_amount < 100
+				decision = "You can have a cup of coffee now." if should_have_coffee else "You should not have a cup of coffee now."
+				self.custom_discription = Label(self, text=f"You would have {bedtime_caffeine_amount}mg of caffeine in your blood if you went to bed at {str(dropdown_dict[self.dd_button_clicked.get()][0]) + str(dropdown_dict[self.dd_button_clicked.get()][1])}.\nIt is as if you had drank {round(int(self.coffee_half_life(caffeine_amount=caffeine_amount,bedtime=timedelta_var) / 90 * 100))}% of a cup of coffee before you went to bed. 100mg+ can cause sleep problems. {decision}", bd=1, relief=SUNKEN, pady=20)
+				self.custom_discription.grid(row=10, column=0)
 			else:
 				pass
 
